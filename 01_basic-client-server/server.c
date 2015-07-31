@@ -4,10 +4,7 @@
 #include <unistd.h>
 #include <rdma/rdma_cma.h>
 
-#define TEST_NZ(x) do { if ( (x)) die("error: " #x " failed (returned non-zero)." ); } while (0)
-#define TEST_Z(x)  do { if (!(x)) die("error: " #x " failed (returned zero/null)."); } while (0)
-
-const int BUFFER_SIZE = 1024;
+#include "common.h"
 
 struct context {
   struct ibv_context *ctx;
@@ -27,8 +24,6 @@ struct connection {
   char *recv_region;
   char *send_region;
 };
-
-static void die(const char *reason);
 
 static void build_context(struct ibv_context *verbs);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
@@ -78,12 +73,6 @@ int main(int argc, char **argv)
   rdma_destroy_event_channel(ec);
 
   return 0;
-}
-
-void die(const char *reason)
-{
-  fprintf(stderr, "%s\n", reason);
-  exit(EXIT_FAILURE);
 }
 
 void build_context(struct ibv_context *verbs)

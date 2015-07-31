@@ -5,10 +5,8 @@
 #include <unistd.h>
 #include <rdma/rdma_cma.h>
 
-#define TEST_NZ(x) do { if ( (x)) die("error: " #x " failed (returned non-zero)." ); } while (0)
-#define TEST_Z(x)  do { if (!(x)) die("error: " #x " failed (returned zero/null)."); } while (0)
+#include "common.h"
 
-const int BUFFER_SIZE = 1024;
 const int TIMEOUT_IN_MS = 500; /* ms */
 
 struct context {
@@ -32,8 +30,6 @@ struct connection {
 
   int num_completions;
 };
-
-static void die(const char *reason);
 
 static void build_context(struct ibv_context *verbs);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
@@ -81,12 +77,6 @@ int main(int argc, char **argv)
   rdma_destroy_event_channel(ec);
 
   return 0;
-}
-
-void die(const char *reason)
-{
-  fprintf(stderr, "%s\n", reason);
-  exit(EXIT_FAILURE);
 }
 
 void build_context(struct ibv_context *verbs)
@@ -207,14 +197,14 @@ void on_completion(struct ibv_wc *wc)
   struct connection *conn = (struct connection *)(uintptr_t)wc->wr_id;
 
   if (wc->status != IBV_WC_SUCCESS)
-    die("on_completion: status is not IBV_WC_SUCCESS.");
+    die("status is not IBV_WC_SUCCESS.");
 
   if (wc->opcode & IBV_WC_RECV)
     printf("received message: %s\n", conn->recv_region);
   else if (wc->opcode == IBV_WC_SEND)
     printf("send completed successfully.\n");
   else
-    die("on_completion: completion isn't a send or a receive.");
+    die("completion isn't a send or a receive.");
 
   if (++conn->num_completions == 2)
     rdma_disconnect(conn->id);
@@ -281,7 +271,7 @@ int on_event(struct rdma_cm_event *event)
   else if (event->event == RDMA_CM_EVENT_DISCONNECTED)
     r = on_disconnect(event->id);
   else
-    die("on_event: unknown event.");
+    die("unknown event: %d", event->event);
 
   return r;
 }
