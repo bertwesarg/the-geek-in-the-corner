@@ -271,7 +271,7 @@ int on_event(struct rdma_cm_event *event)
   else if (event->event == RDMA_CM_EVENT_DISCONNECTED)
     r = on_disconnect(event->id);
   else
-    die("unknown event: %d", event->event);
+    die("unhandled event: %s (%d)", rdma_event_str(event->event), event->event);
 
   return r;
 }
