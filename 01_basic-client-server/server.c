@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
   memset(&addr, 0, sizeof(addr));
   addr.sin6_family = AF_INET6;
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
 
   TEST_Z(ec = rdma_create_event_channel());
   TEST_NZ(rdma_create_id(ec, &listener, NULL, RDMA_PS_TCP));
